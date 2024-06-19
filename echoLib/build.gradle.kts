@@ -4,6 +4,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt")
     kotlin("jvm")
     id("org.jetbrains.dokka")
+    `maven-publish`
 }
 
 val dokkaVersion = extra["dokka.version"] as String
@@ -37,4 +38,31 @@ val sourcesJar by tasks.registering(Jar::class) {
 
 tasks.register("releaseLocal") {
     dependsOn("dokkaJar", "sourcesJar")
+}
+
+tasks.withType<GenerateModuleMetadata>().configureEach {
+    dependsOn(sourcesJar)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            groupId = "com.github.beanyann"
+            artifactId = "echolib"
+            version = project.version.toString()
+            from( components["kotlin"])
+            artifact(sourcesJar.get())
+            artifact(dokkaJar.get())
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/beanyann/echo")
+            credentials {
+                username = System.getenv("GITHUB_USER")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
 }

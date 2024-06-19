@@ -13,13 +13,17 @@ kotlin {
 }
 
 repositories {
-    flatDir {
-        dirs("libs")
+    maven {
+        url = uri("https://plugins.gradle.org/m2/")
+        credentials {
+            username = System.getenv("GITHUB_USER")
+            password = System.getenv("GITHUB_TOKEN")
+        }
     }
 }
 
 dependencies {
-    implementation(fileTree("libs") { include("*.jar") })
+    implementation("com.github.beanyann:echoLib:1.0.0")
 }
 
 tasks.register<Jar>("fatJar") {
